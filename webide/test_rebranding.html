@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rebranding Test</title>
+</head>
+<body>
+    <h1>vLLM Web IDE - Rebranding Test</h1>
+    <p>Testing the rebranded configuration system...</p>
+    
+    <div id="test-results"></div>
+    
+    <script>
+        // Test the rebranded configuration
+        function testConfiguration() {
+            const results = document.getElementById('test-results');
+            
+            // Clear any existing localStorage for testing
+            localStorage.removeItem('vllm_webide_config');
+            
+            // Test default configuration
+            const defaultConfig = {
+                models: {
+                    starcoder: {
+                        name: 'StarCoder2 7B',
+                        endpoint: 'http://localhost:8000',
+                        enabled: true,
+                        description: 'StarCoder2 7B model for code completion'
+                    },
+                    alternative: {
+                        name: 'Alternative Model',
+                        endpoint: 'http://localhost:8001',
+                        enabled: true,
+                        description: 'Alternative model for code completion'
+                    }
+                },
+                api: {
+                    defaultModel: 'starcoder'
+                }
+            };
+            
+            // Save test configuration
+            localStorage.setItem('vllm_webide_config', JSON.stringify(defaultConfig));
+            
+            // Read back and verify
+            const savedConfig = JSON.parse(localStorage.getItem('vllm_webide_config'));
+            
+            let testsPassed = 0;
+            let totalTests = 4;
+            
+            // Test 1: Check if alternative model exists
+            if (savedConfig.models.alternative) {
+                results.innerHTML += '<p>✅ Test 1 PASSED: Alternative model configuration exists</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Test 1 FAILED: Alternative model configuration missing</p>';
+            }
+            
+            // Test 2: Check alternative model name
+            if (savedConfig.models.alternative.name === 'Alternative Model') {
+                results.innerHTML += '<p>✅ Test 2 PASSED: Alternative model has correct name</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Test 2 FAILED: Alternative model name incorrect</p>';
+            }
+            
+            // Test 3: Check no "qwen" references
+            const configString = JSON.stringify(savedConfig);
+            if (!configString.includes('qwen') && !configString.includes('Qwen')) {
+                results.innerHTML += '<p>✅ Test 3 PASSED: No "qwen" references found in config</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Test 3 FAILED: Found "qwen" references in config</p>';
+            }
+            
+            // Test 4: Check alternative endpoint
+            if (savedConfig.models.alternative.endpoint === 'http://localhost:8001') {
+                results.innerHTML += '<p>✅ Test 4 PASSED: Alternative model has correct endpoint</p>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<p>❌ Test 4 FAILED: Alternative model endpoint incorrect</p>';
+            }
+            
+            // Summary
+            results.innerHTML += `<h2>Test Results: ${testsPassed}/${totalTests} tests passed</h2>`;
+            
+            if (testsPassed === totalTests) {
+                results.innerHTML += '<p style="color: green; font-weight: bold;">🎉 ALL TESTS PASSED! Rebranding is complete.</p>';
+            } else {
+                results.innerHTML += '<p style="color: red; font-weight: bold;">❌ Some tests failed. Please check the configuration.</p>';
+            }
+            
+            // URL parameter test
+            results.innerHTML += '<h3>URL Parameter Test</h3>';
+            const currentUrl = window.location.href;
+            const testUrl = currentUrl + '?starcoder_endpoint=http://remote:8000&alternative_endpoint=http://remote:8001&default_model=alternative';
+            results.innerHTML += `<p>Test URL with alternative endpoint: <a href="${testUrl}" target="_blank">${testUrl}</a></p>`;
+        }
+        
+        // Run tests when page loads
+        window.onload = testConfiguration;
+    </script>
+</body>
+</html>

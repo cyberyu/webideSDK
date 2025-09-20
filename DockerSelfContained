@@ -1,0 +1,54 @@
+# Self-contained Docker image with embedded model
+FROM vllm/vllm-openai:v0.8.5
+
+# Install Node.js for the web IDE
+RUN apt-get update && apt-get install -y \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for vLLM
+ENV TRANSFORMERS_OFFLINE=1
+ENV HF_DATASET_OFFLINE=1
+
+# Create model directory
+RUN mkdir -p /app/model
+
+# Copy the model files directly into the container
+COPY starcoder2_7b_22k_ft_80EM/ /app/model/
+
+# Copy web IDE source code
+COPY webide/ /app/webide/
+
+# Install web IDE dependencies and build for production
+WORKDIR /app/webide
+RUN npm install
+RUN npm run build
+
+# Install a simple HTTP server
+RUN npm install -g http-server
+
+# Create startup script (using /app/model instead of /mnt/model)
+RUN echo '#!/bin/bash\n\
+echo "Starting vLLM server..."\n\
+echo "Checking for GPU availability..."\n\
+nvidia-smi || echo "No GPU detected"\n\
+echo "Model files in /app/model:"\n\
+ls -la /app/model/\n\
+vllm serve /app/model/ --dtype half --host 0.0.0.0 --port 8000 &\n\
+echo "Waiting for vLLM to initialize..."\n\
+sleep 10\n\
+echo "Starting web IDE..."\n\
+cd /app/webide/dist && http-server -p 3000 -a 0.0.0.0\n\
+' > /start.sh && chmod +x /start.sh
+
+# Expose ports for both services
+EXPOSE 8000 3000
+
+# Override the vLLM entrypoint
+ENTRYPOINT []
+
+# Start both services
+CMD ["/start.sh"]

@@ -1,0 +1,25 @@
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Hugging Face tokens
+*token*
+*.token
+
+# Personal cache directories
+.cache/
+__pycache__/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

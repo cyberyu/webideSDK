@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LocalStorage Test</title>
+</head>
+<body>
+    <h1>LocalStorage Test for FIM Completions</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Test localStorage functionality
+        function testLocalStorage() {
+            const today = new Date().toISOString().split('T')[0];
+            const storageKey = `fim_completions_${today}`;
+            
+            console.log('Testing localStorage with key:', storageKey);
+            
+            // Check what's currently in localStorage
+            const existing = localStorage.getItem(storageKey);
+            console.log('Existing data:', existing);
+              // Create a test entry
+            const testEntry = {
+                content: "<fim_prefix>function test() { return <fim_suffix>\n}<fim_middle>42;",
+                timestamp: new Date().toISOString(),
+                model: 'StarCoder2 7B'
+            };
+            
+            // Save test data
+            const testData = existing ? JSON.parse(existing) : [];
+            testData.push(testEntry);
+            localStorage.setItem(storageKey, JSON.stringify(testData));
+            
+            console.log('Saved test data:', testData);
+            
+            // Verify it was saved
+            const verified = localStorage.getItem(storageKey);
+            console.log('Verified data:', JSON.parse(verified));
+            
+            // Display results
+            document.getElementById('output').innerHTML = `
+                <h2>Results:</h2>
+                <p><strong>Storage Key:</strong> ${storageKey}</p>
+                <p><strong>Entries Count:</strong> ${JSON.parse(verified).length}</p>
+                <pre><strong>Data:</strong>\n${JSON.stringify(JSON.parse(verified), null, 2)}</pre>
+            `;
+        }
+        
+        // Run test on page load
+        testLocalStorage();
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  vllm-server:
+    build: .
+    runtime: nvidia
+    environment:
+      - TRANSFORMERS_OFFLINE=1
+      - HF_DATASET_OFFLINE=1
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "8000:8000"
+    ipc: host
+    volumes:
+      - ./starcoder2_7b_22k_ft_80EM:/mnt/model
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
